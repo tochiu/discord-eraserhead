@@ -87,7 +87,7 @@ async function erase(triggerMessage, channel, timestamp, filterUsers, users) {
         promises.push(trash[i].delete())
     }
 
-    // for for all delete requests to finish executing in parallel
+    // wait for all delete requests to finish executing in parallel
     let results = await Promise.allSettled(promises)
 
     for (result of results) {
