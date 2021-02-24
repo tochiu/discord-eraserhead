@@ -1,0 +1,31 @@
+{
+    "prefix": "!",
+    "command": "erase",
+    "permission": "ADMINISTRATOR",
+    "visual": {
+        "success": {
+            "color": 12343,
+            "imageURL": "https://i.ibb.co/hBrFcWS/aizawa.gif",
+            "emoji": ":white_check_mark:"
+        },
+        "failure": {
+            "color": 1,
+            "imageURL": "https://i.ibb.co/qYtLrCG/aizawa-sleeping.gif",
+            "emoji": ":x:"
+        }
+    },
+    "all": {
+        "keyword": "all",
+        "time": "4444y",
+        "description": "The Birth of our Lord and Savior Jesus Christ"
+    },
+    "timeUnits": {
+        "s" : { "name": "second", "time": 1        },
+        "m" : { "name": "minute", "time": 60       }, 
+        "h" : { "name": "hour",   "time": 3600     }, 
+        "d" : { "name": "day",    "time": 86400    },
+        "w" : { "name": "week",   "time": 604800   },
+        "mo": { "name": "month",  "time": 2629743  },
+        "y" : { "name": "year",   "time": 31556926 }
+    }
+}

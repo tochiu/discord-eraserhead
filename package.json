@@ -1,0 +1,19 @@
+{
+  "name": "discord-eraserhead",
+  "version": "1.0.0",
+  "description": "Sanitize the messages in your channels to keep your server squeaky clean :)",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/app.js"
+  },
+  "keywords": [
+    "discord"
+  ],
+  "author": "Rusuban#0004",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^12.5.1",
+    "dotenv": "^8.2.0"
+  }
+}
