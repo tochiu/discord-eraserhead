@@ -37,7 +37,7 @@ async function noTime(message) {
 }
 
 // reply with a rich embed detailing how the erase operation went
-async function complete(message, total, breakdown, timeInfo, userInfo) {
+async function complete(message, total, breakdown, timeInfo, taggedUsers) {
     let success = total > 0
     let embed = { /* rich embed object */
         thumbnail: {
@@ -52,7 +52,7 @@ async function complete(message, total, breakdown, timeInfo, userInfo) {
     if (success) {
         let emoji = visual.success.emoji
         let timeStr = timeInfo.isAll ? all.description : getFormattedTimeFromTracker(timeInfo.tracker, true).toUpperCase()
-        let userStr = userInfo.filterUsers ? userInfo.taggedUsers.map(user => user.tag).join(" ") : "all users"
+        let userStr = taggedUsers.length !== 0 ? taggedUsers.map(user => user.tag).join(" ") : "all users"
 
         embed.color = visual.success.color
         embed.description = `${emoji} Erased **${total}** message${total > 1 ? "s" : ""} sent within \`\`\`${timeStr}\`\`\` from **${userStr}** in the following channels:`

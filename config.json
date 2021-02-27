@@ -1,6 +1,7 @@
 {
     "prefix": "!",
     "command": "erase",
+    "cleanCommand": "clean",
     "permission": "ADMINISTRATOR",
     "visual": {
         "success": {

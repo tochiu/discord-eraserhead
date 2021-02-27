@@ -8,8 +8,32 @@ const reply = require("./reply.js")
 
 const erase = require("./erase.js")
 
-const { prefix, command, all, permission } = config
+const { prefix, command, cleanCommand, permission, all } = config
 const { createTimeTracker, updateTimeTracker, getTimeFromTracker } = time
+
+function isCommand(message) {
+    if (   ! message.content.startsWith(prefix)
+        ||   message.author.bot
+        || ! message.member
+        || ! message.member.hasPermission(permission)
+        || !(message.channel instanceof Discord.TextChannel)) {
+            return {
+                args: [], 
+                isValidCommand: false, 
+                isCleanCommand: false
+            }
+        }
+    
+    // cut prefix and split message into array of strings delimited by spaces
+    let args = message.content.toLowerCase().slice(prefix.length).trim().split(/ +/)
+    let msgCommand = args.shift() // get and remove the first string (command) from array
+
+    return {
+        args,
+        isValidCommand: msgCommand === command || msgCommand === cleanCommand, 
+        isCleanCommand: msgCommand === cleanCommand, 
+    }
+}
 
 // setup environment vars
 env.config()
@@ -25,26 +49,22 @@ client.on("ready", () => {
 })
 
 client.on("message", async (message) => {
-    if (   ! message.content.startsWith(prefix)
-        ||   message.author.bot
-        || ! message.member
-        || ! message.member.hasPermission(permission)
-        || !(message.channel instanceof Discord.TextChannel)) return
+
+    let { isValidCommand, isCleanCommand, args } = isCommand(message)
+    if (!isValidCommand) return
+
+    let taggedUsers = message.mentions.users.array()
+    let taggedChannels = message.mentions.channels.array().filter(
+        channel => channel.type === "text")
     
-    // cut prefix and split message into array of strings delimited by spaces
-    let args = message.content.toLowerCase().slice(prefix.length).trim().split(/ +/)
-    let msgCommand = args.shift() // get and remove the first string (command) from array
+    let tracker = createTimeTracker()
+    let isAll = false
 
-    if (msgCommand !== command) return
-
-    /* erase command logic */
-
-    try {
-
-        let taggedUsers = message.mentions.users.array()
-        let taggedChannels = message.mentions.channels.array().filter(
-            channel => channel.type === "text")
-        
+    if (isCleanCommand) {
+        taggedUsers = []
+        isAll = true
+        updateTimeTracker(tracker, all.time)
+    } else {
         let filterUsers = taggedUsers.length !== 0
         
         // no users, no channels found
@@ -52,17 +72,6 @@ client.on("message", async (message) => {
             reply.noTargets(message)
             return
         }
-
-        if (taggedChannels.length === 0) {
-            // get all channels in guild if channels arent specified
-            taggedChannels = message.channel.guild.channels.cache.array().filter(
-                channel => channel.type === "text")
-
-            if (taggedChannels.length === 0) return // no channels found?!
-        }
-
-        let tracker = createTimeTracker()
-        let isAll = false
 
         // run through args to calculate delete time
         for (let arg of args) {
@@ -82,22 +91,43 @@ client.on("message", async (message) => {
                 updateTimeTracker(tracker, arg)
             }
         }
+    }
 
-        let eraseTimeSpan = getTimeFromTracker(tracker)
-        if (eraseTimeSpan === 0) { // happens either cause no arg could be parsed as valid time or the time is not non-zero
-            reply.noTime(message)
-            return
-        }
+    let eraseTimeSpan = getTimeFromTracker(tracker)
+    if (eraseTimeSpan === 0) { // happens either cause no arg could be parsed as valid time or the time is not non-zero
+        reply.noTime(message)
+        return
+    }
 
-        let cutoffTime = Date.now() - eraseTimeSpan
+    if (taggedChannels.length === 0) {
+        // get all channels in guild if channels arent specified
+        taggedChannels = message.channel.guild.channels.cache.array().filter(
+            channel => channel.type === "text")
+
+        if (taggedChannels.length === 0) return // no channels found?!
+    }
+
+    let cutoffTime = Date.now() - eraseTimeSpan
+
+    /* erase command logic */
+
+    try {
 
         /* erase operation */
 
         let promises = []
 
         // push async erase requests to array
-        for (channel of taggedChannels) {
-            promises.push(erase(message, channel, cutoffTime, filterUsers, taggedUsers))
+        if (isCleanCommand) {
+            for (channel of taggedChannels) {
+                promises.push(erase(message, channel, cutoffTime, taggedUsers, 
+                    (msg) => isCommand(msg).isValidCommand || msg.author.id === client.user.id))
+                    // delete if can be parsed as a valid command or is a message from the bot itself
+            }
+        } else {
+            for (channel of taggedChannels) {
+                promises.push(erase(message, channel, cutoffTime, taggedUsers))
+            }
         }
         
         // wait for all erase requests to finish executing in parallel
@@ -131,12 +161,14 @@ client.on("message", async (message) => {
             totalErased += result.value.success
         }
 
-        // send message with details of erase operation
-        reply.complete(message, totalErased, 
-            { erased, anyError }, 
-            { isAll, tracker }, 
-            { filterUsers, taggedUsers }
-        )
+        if (!isCleanCommand) {
+            // send message with details of erase operation
+            reply.complete(message, totalErased, 
+                { erased, anyError }, 
+                { isAll, tracker },
+                taggedUsers
+            )
+        }
 
     } catch(e) { // error occured executing command
 

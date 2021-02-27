@@ -7,13 +7,16 @@ const { Collection } = require("discord.js")
  * Messages older than 2 weeks must be deleted individually
  */
 
- // checks if message is older than 2 weeks
-function isRecent(message) { 
+// checks if message is older than 2 weeks
+function isRecent(message) {
     return Date.now() - message.createdTimestamp < 1209600000
 }
 
 // erase all messages in a given channel that occur after the given timestamp from specified users, if any
-async function erase(triggerMessage, channel, timestamp, filterUsers, users) {
+async function erase(triggerMessage, channel, timestamp, users, filterer) {
+
+    let filterUsers = users.length !== 0
+
     let trash = []
     let beforeID // id of the last message fetched
 
@@ -50,7 +53,12 @@ async function erase(triggerMessage, channel, timestamp, filterUsers, users) {
             if (message.createdTimestamp < timestamp) { // stop if current message is too old
                 running = false
                 break
-            } else if (message.id !== triggerMessage.id && (!filterUsers || userSet.has(message.author.id))) {
+            } else if (
+                ( filterer && filterer(message)) ||
+                (!filterer && message.id !== triggerMessage.id && (!filterUsers || userSet.has(message.author.id)))
+            ) {
+                // put in trash if filter function exists and message passes filter function
+                //     OR
                 // put in trash if message is not the command message
                 //     and message was sent by a specified user, if any
                 trash.push(message)
