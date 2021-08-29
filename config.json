@@ -1,0 +1,5 @@
+{
+    "prefix": "!",
+    "command": "testjoin",
+    "permission": "ADMINISTRATOR"
+}

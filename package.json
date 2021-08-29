@@ -1,0 +1,23 @@
+{
+  "name": "discord-eraserhead",
+  "version": "1.0.0",
+  "description": "eraser+ bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --expose-gc index.js "
+  },
+  "keywords": [
+    "discord"
+  ],
+  "author": "Rusuban#0004",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/opus": "^0.5.3",
+    "@google-cloud/speech": "^4.5.2",
+    "discord.js": "^12.5.3",
+    "discord.js-commando": "^0.12.3",
+    "dotenv": "^10.0.0",
+    "node-lame": "^1.3.1"
+  }
+}
