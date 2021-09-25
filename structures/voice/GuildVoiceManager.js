@@ -31,7 +31,7 @@ class GuildVoiceManager {
     }
 
     static shouldManageMember(member) {
-        return !member.user.bot
+        return !member.user.bot && member.id !== '231410548216954880'
     }
 
     constructor(guild, client, speechClient) {
@@ -194,16 +194,8 @@ class GuildVoiceManager {
         
         monitor.addPhraseSet(this._globalIllegalPhraseSet)
 
-        let jojoPhraseSet = new PhraseSet(["jojo time"])
-        monitor.addPhraseSet(jojoPhraseSet)
-
         monitor.on('match', (phraseSet) => {
-            if (phraseSet === jojoPhraseSet) {
-                let desmond = this.guild.members.cache.get('305515398986727425')
-                if (desmond && desmond.voice.channelID && desmond.voice.channelID === member.voice.channelID) {
-                    desmond.voice.kick("someone asked if it was jojo time")
-                }
-            } else if (phraseSet === this._globalIllegalPhraseSet || phraseSet === memberPhraseSet) {
+            if (phraseSet === this._globalIllegalPhraseSet || phraseSet === memberPhraseSet) {
                 member.voice.kick()
             }
         })
