@@ -1,4 +1,3 @@
-const { clear } = require('console')
 const EventEmitter = require('events')
 
 const AUDIO_CLIP_SECONDS = 30
@@ -22,8 +21,6 @@ const AUDIO_BYTES_PER_SECOND = AUDIO_SINGLE_SAMPLE_BYTES * RECOGNIZE_STREAM_OPTI
 const BUFFER_EMPTY = Buffer.alloc(AUDIO_BYTES_PER_SECOND * RECOGNIZE_STREAM_WRITE_INTERVAL_MS/1000, 0)
 const BUFFER_AUDIO_CLIP_SIZE = AUDIO_BYTES_PER_SECOND * AUDIO_CLIP_SECONDS
 const BUFFER_MAX_SIZE_BYTES = 5000000
-
-console.log(BUFFER_AUDIO_CLIP_SIZE)
 
 class SpeechTranscriber extends EventEmitter {
 
@@ -71,7 +68,6 @@ class SpeechTranscriber extends EventEmitter {
     }
 
     start() {
-        console.log('start')
         this.end(true)
         this.recorder.setSilenceEnabled(false)
 
@@ -85,8 +81,6 @@ class SpeechTranscriber extends EventEmitter {
                     boost: 20
                 }]
             }, RECOGNIZE_STREAM_OPTIONS)
-
-            console.log(recognizeStreamConfig.speechContexts[0].phrases)
         }
 
         this._recognizeStream = this._speechClient
@@ -106,7 +100,6 @@ class SpeechTranscriber extends EventEmitter {
     end(suppressEnableSilence) {
         if (!suppressEnableSilence) {
             this.recorder.setSilenceEnabled(true)
-            console.log('end')
         }
 
         if (this._recognizeStream) {
